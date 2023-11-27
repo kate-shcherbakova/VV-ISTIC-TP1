@@ -13,6 +13,8 @@
 ## Answers
 
 ---
+---
+
 
 ##### Shcherbakova Kateryna 
 ##### Tkachenko Oleksii
@@ -52,6 +54,120 @@ In hindsight, thorough testing of various scenarios could have potentially helpe
 ##### Conclusion
 The Therac-25 incident serves as a stark reminder of the importance of meticulous testing, stringent quality control measures, and comprehensive validation protocols in the development of safety-critical software systems, especially those used in healthcare.
 
+--- 
+
+### Question 2 
+
+#### Issue: Flat3MapTest.tesetEntrySet() is Flaky. Issue Number: COLLECTIONS-768
+
+##### Local or Global
+This issue is localized as it pertains to a specific testEntrySet() function within the context of utilizing putAndRemove() in tests.
+
+##### Problem
+The problem stems from the test function testEntrySet() relying on the helper function putAndRemove(), which incorrectly assumes that map iterators execute in insertion order, while they can iterate in any order. The test currently asserts that the last iterated element (and subsequently removed) is the last inserted element. Consequently, the test passes only if the last iterated element happens to be the last inserted element; otherwise, it fails.
+
+##### Resolution
+The resolution involved replacing the code segment that depended on the iteration order with a more reliable alternative. Instead of directly validating the sequence of insertion and removal, alternative validation methods were implemented, independent of the iteration order. The updated code verifies the values associated with the removed element to ensure they accurately reflect the correct map values after the element is removed. This approach makes testing more robust by removing the dependency on the iteration order.
+
+##### Code Modification
+The commented-out code segment was replaced with a more reliable solution to resolve the error:
+
+```java
+final Map.Entry<K, V> mapEntry1 = it.next();
+final Map.Entry<K, V> mapEntry2 = it.next();
+final Map.Entry<K, V> mapEntry3 = it.next();
+V removedValue = mapEntry3.getValue();
+it.remove();
+// assertEquals(2, map.size());
+// assertEquals("one", map.get("A"));
+// assertEquals("two", map.get("B"));
+// assertEquals(null, map.get("C"));
+assertNotNull(removedValue);
+assertEquals(removedValue.equals("one") ? null : "one", map.get("A"));
+assertEquals(removedValue.equals("two") ? null : "two", map.get("B"));
+assertEquals(removedValue.equals("three") ? null : "three", map.get("C"));
+} 
+```
+
+---
+
+### Question 3
+#### Experiments in Netflix Chaos Engineering Paper (2016)
+##### Experiments performed:
+1. **Chaos Monkey**: Terminating random virtual machine instances during normal working hours.
+2. **Chaos Kong**: Simulating the failure of an entire Amazon EC2 region.
+3. **Failure Injection Testing (FIT)**: Intentionally causing requests between Netflix services to fail.
+
+##### Requirements for these experiments:
+1. Real-world simulations: Replicating hardware failures, network issues, or service outages.
+2. Monitoring systems: Continuous observation of metrics such as starts per second (SPS) and user experience.
+3. Risk mitigation strategies: Strategies to limit the scope of experiments to a subset of users if necessary.
+
+##### Observed Variables:
+1. SPS (Starts Per Second): Primary indicator of system health.
+2. Fine-grained metrics: Request latency, CPU load, service-level indicators for specific services.
+3. Impact on user experience: User ability to stream content or sign up for the service.
+
+##### Main Results Obtained:
+1. Successful service degradation: Services designed to handle instance failures without significant impact on SPS.
+2. Graceful failover in different regions: Minimal impact on SPS when failing over from one region to another.
+3. Emphasis on system availability: Focus on metrics like SPS to gauge overall health, ensuring users can access content.
+
+##### Other Companies & Speculation on Experimentation
+Netflix isn't the only company: Similar techniques are adopted by Amazon, Google, Microsoft, and Facebook, as mentioned in the paper. Other tech giants and Internet-scale organizations likely employ comparable methodologies for resilience testing.
+
+##### Speculation on Experimentation in Other Organizations:
+###### Types of Experiments:
+1. Hardware and Software Failures: Simulating server crashes, network latency, or database malfunctions.
+2. Traffic Surges: Injecting sudden spikes in requests or testing response under heavy loads.
+3. Runtime Configuration Changes: Modifying configuration parameters to observe system behavior.
+
+###### Observed System Variables:
+1. Key Metrics: Vary based on the organization's primary services (e.g., e-commerce sites might track completed purchases per second).
+2. User Experience: Emphasizing indicators like user access to services or successful transactions.
+
+As Chaos Engineering evolves, it will likely involve case studies, improved adoption strategies, standardized tooling, and advanced event injection models to ensure system resilience in diverse organizational setups.
+
+---
+
+### Question 4 
+
+##### Overview
+The article "Bringing the Web up to Speed with WebAssembly" discusses the importance of WebAssembly as low-level code on a web platform and the benefits of having a formal specification for it. 
+
+##### Advantages
+The main benefits of having a formal specification for WebAssembly include:
+1. **Security**: WebAssembly provides secure code execution, which is important on the web where code comes from untrusted sources. This protects user data and system state.
+2. **Speed**: One of the goals of WebAssembly is to achieve high performance. It allows you to use the full performance of the machine by maintaining optimised machine code.
+3. **Portability**: The code written for WebAssembly should be independent of language, hardware platform and operating system. This allows applications to run on different types of browsers and devices with the same behaviour.
+4. **Compactness**: WebAssembly's binary format provides a more compact code representation than JavaScript, which reduces load times and improves application responsiveness.
+
+##### Necessities of testing WebAssembly implementations
+Having a formal specification does not mean that WebAssembly implementations do not need to be tested. Testing remains critical to be sure that the specification is implemented correctly. Even if you have a formal specification, the implementation may contain bugs or inconsistencies that can lead to code execution problems. Thus, testing remains a key step in development, even if you have a formal specification.
+
+---
+
+### Question 5 
+
+##### Overview
+The paper "Mechanising and Verifying the WebAssembly
+Specification" presents a mechanised WebAssembly specification focused on improving the original formal language specification. The authors developed an executable typer and interpreter, and identified and eliminated bugs, thus enriching the verification process of this language specification.
+
+##### Advantages
+The author of the "Mechanising and Verifying the WebAssembly
+Specification" paper highlights several advantages of the mechanized specification:
+1. **Error Identification and Correction**: The mechanized specification process revealed errors in the original formal specification of WebAssembly. Identified errors ranged from issues causing unsoundness in the type system to problems with exception propagation and return operations.
+2. **Enhanced Formalization**: By meticulously mechanizing the specification, the authors ensured a higher level of precision and clarity in the language's formal definition. This process involved proving soundness properties, establishing auxiliary lemmas, and correcting issues that could compromise the language's correctness.
+3. **Artifact Derivation**: The mechanized specification led to the creation of additional artifacts such as an executable type checker and an executable interpreter. These artifacts, derived from the mechanized specification, provided tools for further validation and testing.
+
+##### Verification of the specification
+The author verified the specification through proofs and theorems, such as induction and establishing auxiliary lemmas, to demonstrate the correctness of the mechanized specification. This rigorous mathematical verification helped ensure the accuracy of the formal definitions and properties.
+
+##### Need for testing
+While the mechanized specification and its artifacts significantly enhance the language's formal definition and correctness, they do not eliminate the need for testing entirely. Testing complements formal verification by validating the real-world implementation and uncovering issues not addressed in the formal model or its artifacts. 
+The author's executable interpreter successfully passed various core language conformance tests. Differential testing against major WebAssembly engines also helped validate the interpreter's behavior and potentially discover bugs. This validation, alongside the formal verification, contributes to a more robust and reliable implementation of WebAssembly.
+
+---
 ---
 
 
